@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.trendytech.cs.dao.TenantMapper">
+
+    <resultMap id="BaseResultMap" type="com.licunzhi.model.Tenant">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--继承可扩展，关联查询返回映射（租户成员）-->
+    <resultMap id="TenantMembersMap" type="com.licunzhi.domain.TenantVo" extends="BaseResultMap">
+        <!-- 使用collection将users实体类中字段属性嵌套进来 -->
+        <collection property="users" ofType="com.licunzhi.model.User" >
+            <id column="members_id" property="id" jdbcType="VARCHAR"/><!--租户和用户都有id字段这里可以取其他的名字区分开-->
+            <result column="members_name" property="name" jdbcType="VARCHAR" />
+        </collection>
+    </resultMap>
+
+    <!--查询租户成员 -->
+    <select id="selectMembers" resultMap="TenantMembersMap" parameterType="java.lang.String">
+        select
+        t.*,u.id as members_id, u.name as members_name
+        from tenant t
+        /*外连接*/
+        LEFT OUTER JOIN user u on u.id = t.id
+        where t.id = #{id,jdbcType=VARCHAR}
+    </select>
+</mapper>
